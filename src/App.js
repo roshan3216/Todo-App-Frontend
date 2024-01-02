@@ -3,15 +3,15 @@ import Todo from "./components/todo";
 import {  createTodo, deleteTodo, getAllTodos, searchTodo, updateTodo } from "./api/api";
 
 function App () {
-    const [todos, setTodos] = useState([]);
-    const [todo , setTodo ] = useState('');
+    const [toDos, setToDos] = useState([]);
+    const [toDo , setToDo ] = useState('');
     const [callAPI, setCallAPI] = useState(1);
     const [isUpdating, setIsUpdating] = useState(false);
     const [id , setId ] = useState(-1);
     const [search, setSearch ] = useState('');
 
     const handleChange = (e) =>{
-        setTodo(e.target.value);
+        setToDo(e.target.value);
     }
     
     const handleSubmit = async (e) =>{
@@ -19,19 +19,21 @@ function App () {
         try {
             console.log(isUpdating,'[isUpdating]');
             if(isUpdating){
-                const resp = await updateTodo(id, todo);
+                const resp = await updateTodo(id, toDo);
                 console.log(resp.data,'[resp]-[update]');
                 
                 setIsUpdating(false);
+                // setCallAPI(2);
             }else{
-                console.log(todos,'[todos]');
-                console.log(todo,'[todo]');
-                const resp = await createTodo(todo);
+                console.log(toDos,'[todos]');
+                console.log(toDo,'[todo]');
+                const resp = await createTodo(toDo);
                 console.log(resp.data,'[resp]');
+                // setCallAPI(3);
                 
             }
-            setCallAPI(2);
-            setTodo('');
+            setCallAPI(prev => prev +1);
+            setToDo('');
         } catch (err) {
             console.error(err,'[error in submitting form]');
         }
@@ -47,7 +49,7 @@ function App () {
         try {
             const response = await searchTodo(search);
             console.log(search, response.data, '[search]-[resposne.data]');
-            setTodos(response.data);
+            setToDos(response.data);
         } catch (err) {
             console.error(err, '[error getting search repsonse]');
         }
@@ -56,23 +58,24 @@ function App () {
     const deleteTodos = async (id) =>{
         const resp = await deleteTodo(id);
         console.log(resp.data," id = ",id,'[resp]-[deleteTodo]');
-        setCallAPI(6);
+        setCallAPI(prev => prev +1);
     }
 
 
 
     useEffect(() =>{
+        console.log('callAPI changed:', callAPI);
         (async () =>{
             try {
                 const resp = await getAllTodos();
-                setTodos(resp.data);
+                setToDos(resp.data);
                 
             } catch (err) {
                 console.error(err,'[error in getting todos');
 
             }
         })();
-    },[callAPI]);
+    },[callAPI,search]);
 
 
 
@@ -86,7 +89,7 @@ function App () {
                         <input 
                             type='text' 
                             placeholder = 'Add todos' 
-                            value = {todo}
+                            value = {toDo}
                             onChange={handleChange}
                             style={{textAlign: 'center'}}
                         />
@@ -107,8 +110,9 @@ function App () {
 
                 <div className='list' >
                     {
-                        todos.map((todo) =>{
-                            return <Todo key ={todo.id} id ={todo.id} todo ={todo.todo} setTodo ={setTodo} setId = {setId} setIsUpdating = {setIsUpdating} setCallAPI = {setCallAPI} deleteTodos = {deleteTodos}/>
+                        Array.isArray(toDos) && 
+                        toDos.map((todo) =>{
+                            return <Todo key ={todo.id} id ={todo.id} todo ={todo.todo} setTodo ={setToDo} setId = {setId} setIsUpdating = {setIsUpdating} deleteTodos = {deleteTodos}/>
                         })
                     }
 
